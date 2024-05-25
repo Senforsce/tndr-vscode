@@ -1,0 +1,16 @@
+{
+    "@context": "https://linkedsoftwaredependencies.org/bundles/npm/@ldf/server/^3.0.0/components/context.jsonld",
+    "@id": "urn:ldf-server:my",
+    "import": "preset-qpf:config-defaults.json",
+    "title": "My Linked Data Fragments server (allows to stream large faceted ontologies)",
+    "datasources": [
+      {
+        "@id": "urn:ldf-server:myHdtDatasource",
+        "@type": "HdtDatasource",
+        "datasourceTitle": "Senforsce's Thunderf1sh HDT for extreme performance ontology language server, (coming soon, on Thunderf1sh Pro)",
+        "description": "Your Thunderf1sh HDT back-end",
+        "datasourcePath": "n",
+        "hdtFile": "main.hdt"
+      }
+    ]
+  }

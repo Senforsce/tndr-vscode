@@ -17,12 +17,14 @@ import fs from "fs/promises";
 import path from "path";
 import { LanguageClient } from "vscode-languageclient/node";
 import { lookpath } from "lookpath";
+import axios from "axios";
+import { startServer } from "./server";
 
 export async function activate(ctx: vscode.ExtensionContext) {
   try {
     ctx.subscriptions.push(
       vscode.commands.registerCommand(
-        "templ.restartServer",
+        "thunderf1sh-owl.restartServer",
         startLanguageClient
       )
     );
@@ -31,6 +33,155 @@ export async function activate(ctx: vscode.ExtensionContext) {
   } catch (err) {
     const msg = err && (err as Error) ? (err as Error).message : "unknown";
     vscode.window.showErrorMessage(`error initializing templ LSP: ${msg}`);
+  }
+
+  try {
+    const settings = vscode.workspace.getConfiguration(
+      "thunderf1sh-owl.Turtle"
+    );
+    const lpfEndpoint =
+      (settings.get("lpfServerEndpoint") as string) ?? "http://localhost:3002";
+    const sparqlEndpoint =
+      (settings.get("sparqlEndpoint") as string) ?? "http://localhost:3030/ds";
+    const textDecoration =
+      (settings.get("textDecoration") as string) ?? "underline";
+    const color = (settings.get("color") as string) ?? "white";
+    const backgroundColor = settings.get("backgroundColor") ?? "purple";
+
+    const color2 = "gray";
+    const backgroundColor2 = "transparent";
+    const textDecoration2 = "none";
+
+    const prefixes = settings.get("prefixes") as string;
+
+    let commandDisposable = vscode.commands.registerCommand(
+      "thunderf1sh-owl.inspect",
+      () => {
+        startServer({
+          lpfEndpoint,
+          sparqlEndpoint,
+          prefixes,
+        });
+      }
+    );
+
+    ctx.subscriptions.push(commandDisposable);
+
+    let disposable = vscode.languages.registerHoverProvider(["go", "t1"], {
+      async provideHover(document, position, token) {
+        // Get the word at the current position
+
+        const wordRange = document.getWordRangeAtPosition(
+          position,
+          /[ "].+[ "\n]/g
+        );
+        const word = wordRange ? document.getText(wordRange) : "";
+        // Check if the word matches the pattern "prefix:SomeIdentifier"
+        const pattern = /[ "](\w+:\w+)[ "\n]/g;
+        const match = word.match(pattern);
+
+        if (match) {
+          const subj = match[1] ?? match[0].replaceAll(`"`, "");
+          const resp = await axios.get(`${lpfEndpoint}/subject/${subj}`);
+
+          console.log(resp);
+
+          if (resp.status === 200 && resp.data) {
+            console.log(resp.status, resp.data);
+
+            const mkdown = `
+### ${subj}
+
+${resp.data?.p?.value} : ${resp.data?.o?.value}
+
+                `;
+
+            const hoverText = new vscode.MarkdownString(mkdown);
+            console.log(resp.status, resp.data);
+
+            return new vscode.Hover(hoverText);
+          } else {
+            console.log(resp.status, resp.data);
+            const hoverText = new vscode.MarkdownString("loading.....");
+
+            return new vscode.Hover(hoverText);
+          }
+        }
+      },
+    });
+
+    ctx.subscriptions.push(disposable);
+    let decorationType = vscode.window.createTextEditorDecorationType({
+      backgroundColor,
+      textDecoration,
+      color,
+    });
+
+    let decorationType2 = vscode.window.createTextEditorDecorationType({
+      backgroundColor: backgroundColor2,
+      textDecoration: textDecoration2,
+      color: color2,
+    });
+
+    vscode.window.onDidChangeActiveTextEditor(
+      (editor) => {
+        if (!editor) {
+          return;
+        }
+        updateDecorations(editor);
+      },
+      null,
+      ctx.subscriptions
+    );
+
+    vscode.workspace.onDidChangeTextDocument(
+      (event) => {
+        if (
+          vscode.window.activeTextEditor &&
+          event.document === vscode.window.activeTextEditor.document
+        ) {
+          updateDecorations(vscode.window.activeTextEditor);
+        }
+      },
+      null,
+      ctx.subscriptions
+    );
+
+    function updateDecorations(editor: vscode.TextEditor) {
+      if (!editor) {
+        return;
+      }
+
+      const regex = /[ "](\w+:\w+)[ "\n]/g;
+      const text = editor.document.getText();
+      const decorations: vscode.DecorationOptions[] = [];
+      let match;
+      while ((match = regex.exec(text))) {
+        const startPos = editor.document.positionAt(match.index);
+        const endPos = editor.document.positionAt(
+          match.index + match[0].length
+        );
+        const decoration = { range: new vscode.Range(startPos, endPos) };
+        decorations.push(decoration);
+      }
+
+      const regex2 = /\/-\s(.+)\s-\//g;
+      const decorations2: vscode.DecorationOptions[] = [];
+      let match2;
+      while ((match2 = regex2.exec(text))) {
+        const startPos = editor.document.positionAt(match2.index);
+        const endPos = editor.document.positionAt(
+          match2.index + match2[0].length
+        );
+        const decoration = { range: new vscode.Range(startPos, endPos) };
+        decorations2.push(decoration);
+      }
+      editor.setDecorations(decorationType2, decorations2);
+      editor.setDecorations(decorationType, decorations);
+    }
+  } catch (err) {
+    const msg = err && (err as Error) ? (err as Error).message : "unknown";
+    vscode.window.showErrorMessage(`error initializing t1 LSP: ${msg}`);
   }
 }
 
@@ -42,51 +193,51 @@ interface Configuration {
   http: string;
 }
 
-interface TemplCtx {
+interface T1Ctx {
   languageClient?: LanguageClient;
 }
 
-const ctx: TemplCtx = {};
+const ctx: T1Ctx = {};
 
 const loadConfiguration = (): Configuration => {
   const c = vscode.workspace.getConfiguration("templ");
   return {
-    goplsLog: c.get("goplsLog") || "",
-    goplsRPCTrace: c.get("goplsRPCTrace") ? true : false,
-    log: c.get("log") || "",
-    pprof: c.get("pprof") ? true : false,
-    http: c.get("http") || "",
+    goplsLog: c.get("goplsLog") ?? "",
+    goplsRPCTrace: !!c.get("goplsRPCTrace"),
+    log: c.get("log") ?? "",
+    pprof: !!c.get("pprof"),
+    http: c.get("http") ?? "",
   };
 };
 
-const templLocations = [
-  path.join(process.env.GOBIN ?? "", "templ"),
-  path.join(process.env.GOBIN ?? "", "templ.exe"),
-  path.join(process.env.GOPATH ?? "", "bin", "templ"),
-  path.join(process.env.GOPATH ?? "", "bin", "templ.exe"),
-  path.join(process.env.GOROOT || "", "bin", "templ"),
-  path.join(process.env.GOROOT || "", "bin", "templ.exe"),
-  path.join(process.env.HOME || "", "bin", "templ"),
-  path.join(process.env.HOME || "", "bin", "templ.exe"),
-  path.join(process.env.HOME || "", "go", "bin", "templ"),
-  path.join(process.env.HOME || "", "go", "bin", "templ.exe"),
-  "/usr/local/bin/templ",
-  "/usr/bin/templ",
-  "/usr/local/go/bin/templ",
-  "/usr/local/share/go/bin/templ",
-  "/usr/share/go/bin/templ",
+const t1Locations = [
+  path.join(process.env.GOBIN ?? "", "t1"),
+  path.join(process.env.GOBIN ?? "", "t1.exe"),
+  path.join(process.env.GOPATH ?? "", "bin", "t1"),
+  path.join(process.env.GOPATH ?? "", "bin", "t1.exe"),
+  path.join(process.env.GOROOT ?? "", "bin", "t1"),
+  path.join(process.env.GOROOT ?? "", "bin", "t1.exe"),
+  path.join(process.env.HOME ?? "", "bin", "t1"),
+  path.join(process.env.HOME ?? "", "bin", "t1.exe"),
+  path.join(process.env.HOME ?? "", "go", "bin", "t1"),
+  path.join(process.env.HOME ?? "", "go", "bin", "t1.exe"),
+  "/usr/local/bin/t1",
+  "/usr/bin/t1",
+  "/usr/local/go/bin/t1",
+  "/usr/local/share/go/bin/t1",
+  "/usr/share/go/bin/t1",
 ];
 
-async function findTempl(): Promise<string> {
-  const linuxName = await lookpath("templ");
+async function findTndr(): Promise<string> {
+  const linuxName = await lookpath("t1");
   if (linuxName) {
     return linuxName;
   }
-  const windowsName = await lookpath("templ.exe");
+  const windowsName = await lookpath("t1.exe");
   if (windowsName) {
     return windowsName;
   }
-  for (const exe of templLocations) {
+  for (const exe of t1Locations) {
     try {
       await fs.stat(exe);
       return exe;
@@ -95,7 +246,7 @@ async function findTempl(): Promise<string> {
     }
   }
   throw new Error(
-    `Could not find templ executable in path or in ${templLocations.join(", ")}`
+    `Could not find tndr executable in path or in ${t1Locations.join(", ")}`
   );
 }
 
@@ -123,7 +274,7 @@ async function startLanguageClient() {
 }
 
 export async function buildLanguageClient(): Promise<LanguageClient> {
-  const documentSelector = [{ language: "templ", scheme: "file" }];
+  const documentSelector = [{ language: "thunderf1sh", scheme: "file" }];
 
   const config = loadConfiguration();
   const args: Array<string> = ["lsp"];
@@ -143,19 +294,22 @@ export async function buildLanguageClient(): Promise<LanguageClient> {
     args.push(`-http=${config.http}`);
   }
 
-  const templPath = await findTempl();
+  const t1Path = await findTndr();
 
   if (ctx.languageClient) {
     await stopLanguageClient();
   }
 
-  vscode.window.setStatusBarMessage(`Starting LSP: templ ${args.join(" ")}`, 3000);
+  vscode.window.setStatusBarMessage(
+    `Starting LSP: thunderf1sh ${args.join(" ")}`,
+    3000
+  );
 
   const c = new LanguageClient(
-    "templ", // id
-    "templ",
+    "tndr", // id
+    "t1",
     {
-      command: templPath,
+      command: t1Path,
       args,
     },
     {

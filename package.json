@@ -1,19 +1,19 @@
 {
-  "name": "templ",
-  "displayName": "templ-vscode",
-  "description": "Provides syntax highlighting and templ LSP integration.",
-  "publisher": "a-h",
-  "icon": "templ.png",
+  "name": "tndr",
+  "displayName": "tndr-vscode",
+  "description": "Superset of templ, Provides syntax highlighting and tndr LSP integration. (thanks to templ)",
+  "publisher": "Senforsce",
+  "icon": "tndr.png",
   "repository": {
-    "url": "https://github.com/a-h/templ-vscode"
+    "url": "https://github.com/senforsce/tndr-vscode"
   },
   "activationEvents": [
-    "workspaceContains:**/*.templ"
+    "workspaceContains:**/*.t1"
   ],
   "main": "./dist/main.js",
-  "version": "0.0.22",
+  "version": "0.0.1",
   "engines": {
-    "vscode": "^1.86.0"
+    "vscode": "^1.88.0"
   },
   "scripts": {
     "webpack": "webpack --mode development",
@@ -29,22 +29,34 @@
   "contributes": {
     "languages": [
       {
-        "id": "templ",
+        "id": "tndr",
         "aliases": [
-          "templ",
-          "templ"
+          "tndr",
+          "t1"
         ],
         "extensions": [
-          ".templ"
+          ".t1"
         ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
+        "language": "thunderf1sh",
+        "scopeName": "source.t1",
+        "path": "./syntaxes/thunderf1sh.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.go": "go",
+          "meta.embedded.block.js": "js",
+          "meta.embedded.block.html": "html",
+          "meta.embedded.block.css": "css",
+          "meta.embedded.block.o8": "ttl"
+        }
+      },
+      {
         "language": "templ",
         "scopeName": "source.templ",
-        "path": "./syntaxes/templ.tmLanguage.json",
+        "path": "./syntaxes/thunderf1sh.tmLanguage.json",
         "embeddedLanguages": {
           "meta.embedded.block.go": "go",
           "meta.embedded.block.js": "js",
@@ -55,53 +67,123 @@
     ],
     "commands": [
       {
-        "command": "templ.restartServer",
-        "title": "Templ: Restart Language Server"
+        "command": "tndr.restartServer",
+        "title": "Tndr: Restart Language Server"
       }
     ],
     "configuration": {
-      "title": "templ",
+      "title": "Tndr",
       "properties": {
-        "templ.goplsLog": {
+        "t1.goplsLog": {
           "type": "string",
           "default": "",
-          "description": "The path used to write gopls logs to (same as the templ -goplsLog argument)"
+          "description": "The path used to write gopls logs to (same as the t1 -goplsLog argument)"
         },
-        "templ.goplsRPCTrace": {
+        "t1.goplsRPCTrace": {
           "type": "boolean",
           "default": false,
-          "description": "Set to true to enable gopls RPC tracing (same as the templ -goplsRPCTrace argument)"
+          "description": "Set to true to enable gopls RPC tracing (same as the t1 -goplsRPCTrace argument)"
         },
-        "templ.log": {
+        "t1.log": {
           "type": "string",
           "default": "",
-          "description": "When set to a filename, templ will be written to the file (same as the templ -log argument)"
+          "description": "When set to a filename, t1 will be written to the file (same as the t1 -log argument)"
         },
-        "templ.pprof": {
+        "t1.pprof": {
           "type": "boolean",
           "default": false,
-          "description": "Set to true to enable a pprof HTTP endppint (same as the templ -pprof argument)"
+          "description": "Set to true to enable a pprof HTTP endppint (same as the t1 -pprof argument)"
         },
-        "templ.http": {
+        "t1.http": {
           "type": "string",
           "default": "",
-          "description": "Set to a value such as localhost:7474 to enable a HTTP endpoint that can be used for debugging (same as the templ -http argument)"
+          "description": "Set to a value such as localhost:7474 to enable a HTTP endpoint that can be used for debugging (same as the t1 -http argument)"
+        },
+        "t1.prefixes": {
+          "type": "string",
+          "default": "",
+          "description": "a newline separated prefix statements to shorten terms in code PREFIX ex: http://example./com",
+          "editPresentation": "multilineText"
+        },
+        "t1.sparqlEndpoint": {
+          "type": ["string"],
+          "default": "http://localhost:3030/ds",
+          "description": "Defines which triple store to lookup for definitions of subjects"
+        },
+        "t1.lpfServerEndpoint": {
+          "type": ["string"],
+          "default": "http://localhost:3002",
+          "description": "Defines which lpf gateway to stream sparql responses from"
+        },
+        "t1.hdtFilePath": {
+          "type": ["string"],
+          "default": "./main.hdt",
+          "description": "(Coming Soon) Defines which compressed graph to search definitions of subjects"
+        },
+        "t1.textDecoration": {
+          "type": ["string"],
+          "default": "underline",
+          "description": "Defines the default text decoration of matched terms"
+        },
+        "t1.backgroundColor": {
+          "type": ["string"],
+          "default": "purple",
+          "description": "Defines the background color of the matched term"
+        },
+        "t1.color": {
+          "type": ["string"],
+          "default": "white",
+          "description": "Defines the color of the matched term"
+        },
+        "t1.textDecoration2": {
+          "type": ["string"],
+          "default": "none",
+          "description": "Defines the default text decoration of matched terms"
+        },
+        "t1.backgroundColor2": {
+          "type": ["string"],
+          "default": "transparent",
+          "description": "Defines the background color of the matched term"
+        },
+        "t1.color2": {
+          "type": ["string"],
+          "default": "gray",
+          "description": "Defines the color of the matched term"
         }
       }
     }
   },
   "devDependencies": {
-    "@types/vscode": "1.87.0",
-    "@vscode/test-electron": "2.3.9",
-    "@vscode/vsce": "^2.24.0",
-    "standard-version": "^9.5.0",
-    "ts-loader": "9.5.1",
-    "typescript": "5.4.3",
+    "@ldf/server": "^3.3.0",
+    "@types/express": "^4.17.21",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.88.0",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.57.0",
+    "express": "^4.19.2",
+    "fetch-sparql-endpoint": "^4.1.1",
+    "sparql-http-client": "^3.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
     "webpack": "5.91.0",
-    "webpack-cli": "5.1.4"
+    "webpack-cli": "5.1.4",
+    "@vscode/vsce": "^2.24.0",
+    "standard-version": "^9.5.0"
+
   },
   "dependencies": {
     "lookpath": "^1.2.2",
+    "express": "^4.19.2",
+    "@ldf/server": "^3.3.0",
+    "axios": "^1.6.8",
+    "stream-to-buffer": "^0.1.0",
+    "stream-to-string": "^1.2.1",
+    "fetch-sparql-endpoint": "^4.1.1",
+    "sparql-http-client": "^3.0.0",
     "vscode-languageclient": "9.0.1"
   }
 }
