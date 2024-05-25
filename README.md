@@ -1,12 +1,13 @@
-# templ
+# Tndr
 
 ## Features
 
-Syntax highlighting for the templ language (https://github.com/a-h/templ).
+Syntax highlighting for the Tndr t1 language (https://github.com/senforsce/t1).
+(A Superset of templ with support for compressed and soon streamed ontologies)
 
 ## Requirements
 
-Requires `templ` and `gopls` on the system path to function.
+Requires `t1` and `gopls` on the system path to function.
 
 ## Issues
 
