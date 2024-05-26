@@ -49,8 +49,6 @@ export const startServer = async (settings?: Record<string, string>) => {
   app.get("/subject/:subject", async (req, res) => {
     const subject = req.params.subject;
 
-    console.log(`subject ${subject} is called`);
-
     try {
       // Fetch bindings
       const streamServer = await myFetcher.fetchBindings(

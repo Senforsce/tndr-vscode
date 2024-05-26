@@ -11,7 +11,7 @@
     "workspaceContains:**/*.t1"
   ],
   "main": "./dist/main.js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.88.0"
   },
@@ -42,26 +42,15 @@
     ],
     "grammars": [
       {
-        "language": "thunderf1sh",
+        "language": "tndr",
         "scopeName": "source.t1",
-        "path": "./syntaxes/thunderf1sh.tmLanguage.json",
+        "path": "./syntaxes/tndr.tmLanguage.json",
         "embeddedLanguages": {
           "meta.embedded.block.go": "go",
           "meta.embedded.block.js": "js",
           "meta.embedded.block.html": "html",
           "meta.embedded.block.css": "css",
           "meta.embedded.block.o8": "ttl"
-        }
-      },
-      {
-        "language": "templ",
-        "scopeName": "source.templ",
-        "path": "./syntaxes/thunderf1sh.tmLanguage.json",
-        "embeddedLanguages": {
-          "meta.embedded.block.go": "go",
-          "meta.embedded.block.js": "js",
-          "meta.embedded.block.html": "html",
-          "meta.embedded.block.css": "css"
         }
       }
     ],

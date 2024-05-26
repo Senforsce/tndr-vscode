@@ -24,7 +24,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
   try {
     ctx.subscriptions.push(
       vscode.commands.registerCommand(
-        "thunderf1sh-owl.restartServer",
+        "tndr.restartServer",
         startLanguageClient
       )
     );
@@ -32,12 +32,12 @@ export async function activate(ctx: vscode.ExtensionContext) {
     await startLanguageClient();
   } catch (err) {
     const msg = err && (err as Error) ? (err as Error).message : "unknown";
-    vscode.window.showErrorMessage(`error initializing templ LSP: ${msg}`);
+    vscode.window.showErrorMessage(`error initializing t1 LSP: ${msg}`);
   }
 
   try {
     const settings = vscode.workspace.getConfiguration(
-      "thunderf1sh-owl.Turtle"
+      "tndr.Turtle"
     );
     const lpfEndpoint =
       (settings.get("lpfServerEndpoint") as string) ?? "http://localhost:3002";
@@ -55,7 +55,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
     const prefixes = settings.get("prefixes") as string;
 
     let commandDisposable = vscode.commands.registerCommand(
-      "thunderf1sh-owl.inspect",
+      "tndr.inspect",
       () => {
         startServer({
           lpfEndpoint,
@@ -274,7 +274,7 @@ async function startLanguageClient() {
 }
 
 export async function buildLanguageClient(): Promise<LanguageClient> {
-  const documentSelector = [{ language: "thunderf1sh", scheme: "file" }];
+  const documentSelector = [{ language: "tndr", scheme: "file" }];
 
   const config = loadConfiguration();
   const args: Array<string> = ["lsp"];
@@ -301,8 +301,8 @@ export async function buildLanguageClient(): Promise<LanguageClient> {
   }
 
   vscode.window.setStatusBarMessage(
-    `Starting LSP: thunderf1sh ${args.join(" ")}`,
-    3000
+    `Starting LSP: Tndr ${args.join(" ")}`,
+    8989
   );
 
   const c = new LanguageClient(

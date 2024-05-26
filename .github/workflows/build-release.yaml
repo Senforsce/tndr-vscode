@@ -67,7 +67,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
           cache: npm
 
       - name: Install Node.js dependencies
@@ -85,8 +85,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: templ-${{ env.EXT_VERSION }}.vsix
-          path: ./templ-${{ env.EXT_VERSION }}.vsix
+          name: t1-${{ env.EXT_VERSION }}.vsix
+          path: ./t1-${{ env.EXT_VERSION }}.vsix
 
       - name: Create release and upload release asset
         uses: actions/github-script@v7
@@ -104,13 +104,13 @@ jobs:
               generate_release_notes: true
             });
 
-            const path = "./templ-${{ env.EXT_VERSION }}.vsix";
+            const path = "./t1-${{ env.EXT_VERSION }}.vsix";
             await github.rest.repos.uploadReleaseAsset({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: release.data.id,
               data: fs.readFileSync(path),
-              name: "templ-${{ env.EXT_VERSION }}.vsix",
+              name: "t1-${{ env.EXT_VERSION }}.vsix",
               headers: {
                 "content-type": "application/vsix",
                 "content-length": fs.statSync(path).size
@@ -131,7 +131,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: templ-${{ needs.release.outputs.version }}.vsix
+          name: t1-${{ needs.release.outputs.version }}.vsix
 
       - name: Publish to marketplace
         # https://github.com/HaaLeo/publish-vscode-extension/releases/tag/v1.4.0
@@ -139,8 +139,8 @@ jobs:
         with:
           pat: ${{ secrets.PUBLISHER_KEY }}
           registryUrl: https://marketplace.visualstudio.com
-          extensionFile: ./templ-${{ needs.release.outputs.version }}.vsix
-          
+          extensionFile: ./t1-${{ needs.release.outputs.version }}.vsix
+
   open-vsx-publish:
     name: Publish to Open VSX Registry
     needs: release
@@ -152,7 +152,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: templ-${{ needs.release.outputs.version }}.vsix
+          name: t1-${{ needs.release.outputs.version }}.vsix
 
       - name: Publish to Registry
         run: |
