@@ -21,7 +21,37 @@ import axios from "axios";
 import { startServer } from "./server";
 
 export async function activate(ctx: vscode.ExtensionContext) {
+  const settings = vscode.workspace.getConfiguration(
+    "tndr.Config"
+  );
+  const lpfEndpoint =
+    (settings.get("lpfServerEndpoint") as string) ?? "http://localhost:3002";
+  const sparqlEndpoint =
+    (settings.get("sparqlEndpoint") as string) ?? "http://localhost:3030/ds";
+  const prefixes = settings.get("prefixes") as string;
+  const textDecoration =
+  (settings.get("textDecoration") as string) ?? "underline";
+  const color = (settings.get("color") as string) ?? "white";
+  const backgroundColor = settings.get("backgroundColor") ?? "purple";
+  const color2 = "gray";
+  const backgroundColor2 = "transparent";
+  const textDecoration2 = "none";
+
+  let decorationType = vscode.window.createTextEditorDecorationType({
+    backgroundColor,
+    textDecoration,
+    color,
+  });
+  
+  let decorationType2 = vscode.window.createTextEditorDecorationType({
+    backgroundColor: backgroundColor2,
+    textDecoration: textDecoration2,
+    color: color2,
+  });
+  
   try {
+    const { startLanguageClient } = paramLanguageClient(lpfEndpoint, sparqlEndpoint, prefixes)
+
     ctx.subscriptions.push(
       vscode.commands.registerCommand(
         "tndr.restartServer",
@@ -30,47 +60,17 @@ export async function activate(ctx: vscode.ExtensionContext) {
     );
 
     await startLanguageClient();
+    updateDecorations(vscode.window.activeTextEditor!, decorationType, decorationType2)
   } catch (err) {
     const msg = err && (err as Error) ? (err as Error).message : "unknown";
     vscode.window.showErrorMessage(`error initializing t1 LSP: ${msg}`);
   }
 
   try {
-    const settings = vscode.workspace.getConfiguration(
-      "tndr.Turtle"
-    );
-    const lpfEndpoint =
-      (settings.get("lpfServerEndpoint") as string) ?? "http://localhost:3002";
-    const sparqlEndpoint =
-      (settings.get("sparqlEndpoint") as string) ?? "http://localhost:3030/ds";
-    const textDecoration =
-      (settings.get("textDecoration") as string) ?? "underline";
-    const color = (settings.get("color") as string) ?? "white";
-    const backgroundColor = settings.get("backgroundColor") ?? "purple";
-
-    const color2 = "gray";
-    const backgroundColor2 = "transparent";
-    const textDecoration2 = "none";
-
-    const prefixes = settings.get("prefixes") as string;
-
-    let commandDisposable = vscode.commands.registerCommand(
-      "tndr.inspect",
-      () => {
-        startServer({
-          lpfEndpoint,
-          sparqlEndpoint,
-          prefixes,
-        });
-      }
-    );
-
-    ctx.subscriptions.push(commandDisposable);
-
-    let disposable = vscode.languages.registerHoverProvider(["go", "t1"], {
+   
+    let disposable = vscode.languages.registerHoverProvider(["go", "tndr"], {
       async provideHover(document, position, token) {
         // Get the word at the current position
-
         const wordRange = document.getWordRangeAtPosition(
           position,
           /[ "].+[ "\n]/g
@@ -111,24 +111,13 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
     });
 
     ctx.subscriptions.push(disposable);
-    let decorationType = vscode.window.createTextEditorDecorationType({
-      backgroundColor,
-      textDecoration,
-      color,
-    });
-
-    let decorationType2 = vscode.window.createTextEditorDecorationType({
-      backgroundColor: backgroundColor2,
-      textDecoration: textDecoration2,
-      color: color2,
-    });
 
     vscode.window.onDidChangeActiveTextEditor(
       (editor) => {
         if (!editor) {
           return;
         }
-        updateDecorations(editor);
+        updateDecorations(editor, decorationType, decorationType2);
       },
       null,
       ctx.subscriptions
@@ -140,49 +129,51 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
           vscode.window.activeTextEditor &&
           event.document === vscode.window.activeTextEditor.document
         ) {
-          updateDecorations(vscode.window.activeTextEditor);
+          updateDecorations(vscode.window.activeTextEditor, decorationType, decorationType2);
         }
       },
       null,
       ctx.subscriptions
     );
 
-    function updateDecorations(editor: vscode.TextEditor) {
-      if (!editor) {
-        return;
-      }
-
-      const regex = /[ "](\w+:\w+)[ "\n]/g;
-      const text = editor.document.getText();
-      const decorations: vscode.DecorationOptions[] = [];
-      let match;
-      while ((match = regex.exec(text))) {
-        const startPos = editor.document.positionAt(match.index);
-        const endPos = editor.document.positionAt(
-          match.index + match[0].length
-        );
-        const decoration = { range: new vscode.Range(startPos, endPos) };
-        decorations.push(decoration);
-      }
-
-      const regex2 = /\/-\s(.+)\s-\//g;
-      const decorations2: vscode.DecorationOptions[] = [];
-      let match2;
-      while ((match2 = regex2.exec(text))) {
-        const startPos = editor.document.positionAt(match2.index);
-        const endPos = editor.document.positionAt(
-          match2.index + match2[0].length
-        );
-        const decoration = { range: new vscode.Range(startPos, endPos) };
-        decorations2.push(decoration);
-      }
-      editor.setDecorations(decorationType2, decorations2);
-      editor.setDecorations(decorationType, decorations);
-    }
   } catch (err) {
     const msg = err && (err as Error) ? (err as Error).message : "unknown";
     vscode.window.showErrorMessage(`error initializing t1 LSP: ${msg}`);
   }
+}
+
+
+function updateDecorations(editor: vscode.TextEditor, decorationType: vscode.TextEditorDecorationType, decorationType2: vscode.TextEditorDecorationType) {
+
+
+  console.log("WD", editor, decorationType, decorationType2)
+
+  const regex = /[ "](\w+:\w+)[ "\n]/g;
+  const text = editor.document.getText();
+  const decorations: vscode.DecorationOptions[] = [];
+  let match;
+  while ((match = regex.exec(text))) {
+    const startPos = editor.document.positionAt(match.index);
+    const endPos = editor.document.positionAt(
+      match.index + match[0].length
+    );
+    const decoration = { range: new vscode.Range(startPos, endPos) };
+    decorations.push(decoration);
+  }
+
+  const regex2 = /\/-\s(.+)\s-\//g;
+  const decorations2: vscode.DecorationOptions[] = [];
+  let match2;
+  while ((match2 = regex2.exec(text))) {
+    const startPos = editor.document.positionAt(match2.index);
+    const endPos = editor.document.positionAt(
+      match2.index + match2[0].length
+    );
+    const decoration = { range: new vscode.Range(startPos, endPos) };
+    decorations2.push(decoration);
+  }
+  editor.setDecorations(decorationType2, decorations2);
+  editor.setDecorations(decorationType, decorations);
 }
 
 interface Configuration {
@@ -200,7 +191,7 @@ interface T1Ctx {
 const ctx: T1Ctx = {};
 
 const loadConfiguration = (): Configuration => {
-  const c = vscode.workspace.getConfiguration("templ");
+  const c = vscode.workspace.getConfiguration("tndr.Config");
   return {
     goplsLog: c.get("goplsLog") ?? "",
     goplsRPCTrace: !!c.get("goplsRPCTrace"),
@@ -268,9 +259,22 @@ async function stopLanguageClient() {
   }
 }
 
+function paramLanguageClient(lpfEndpoint: string, sparqlEndpoint: string, prefixes: string) : { startLanguageClient: () => Promise<void> } {
+  startServer({
+    lpfEndpoint,
+    sparqlEndpoint,
+    prefixes,
+  });
+
+  return {
+    startLanguageClient
+  }
+}
+
 async function startLanguageClient() {
   ctx.languageClient = await buildLanguageClient();
   await ctx.languageClient.start();
+
 }
 
 export async function buildLanguageClient(): Promise<LanguageClient> {
@@ -302,12 +306,12 @@ export async function buildLanguageClient(): Promise<LanguageClient> {
 
   vscode.window.setStatusBarMessage(
     `Starting LSP: Tndr ${args.join(" ")}`,
-    8989
+    3000
   );
 
   const c = new LanguageClient(
     "tndr", // id
-    "t1",
+    "tndr",
     {
       command: t1Path,
       args,

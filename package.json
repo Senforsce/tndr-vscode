@@ -11,7 +11,7 @@
     "workspaceContains:**/*.t1"
   ],
   "main": "./dist/main.js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "engines": {
     "vscode": "^1.88.0"
   },
@@ -43,7 +43,7 @@
     "grammars": [
       {
         "language": "tndr",
-        "scopeName": "source.t1",
+        "scopeName": "source.tndr",
         "path": "./syntaxes/tndr.tmLanguage.json",
         "embeddedLanguages": {
           "meta.embedded.block.go": "go",
@@ -61,7 +61,7 @@
       }
     ],
     "configuration": {
-      "title": "Tndr",
+      "title": "Config",
       "properties": {
         "t1.goplsLog": {
           "type": "string",
@@ -139,6 +139,12 @@
           "default": "gray",
           "description": "Defines the color of the matched term"
         }
+      }
+    },
+    "configurationDefaults": {
+      "explorer.fileNesting.enabled": true,
+      "explorer.fileNesting.patterns": {
+        "*.t1": "${capture}_t1.go"
       }
     }
   },
