@@ -2,7 +2,7 @@
 
 ## Features
 
-Syntax highlighting for the Tndr t1 language (https://github.com/senforsce/t1).
+Syntax highlighting for the Tndr t1 language (https://github.com/senforsce/tndr).
 (A Superset of t1 with support for compressed and soon streamed ontologies)
 
 ## Requirements
@@ -11,7 +11,7 @@ Requires `t1` and `gopls` on the system path to function.
 
 ## Issues
 
-Please raise any issues in https://github.com/senforsce/t1
+Please raise any issues in https://github.com/senforsce/tndr
 
 ## Tasks
 

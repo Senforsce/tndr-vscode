@@ -19,17 +19,17 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.0.20](https://github.com/t1-go/t1-vscode/compare/v0.0.19...v0.0.20) (2024-02-18)
 
-- Resolve single line import expression syntax highlighting, fixes [#508](https://github.com/senforsce/t1/issues/508) in #29
-- Refactor import-expression syntax regex matching, fixes [#524](https://github.com/senforsce/t1/issues/524) in #30
-- Refactor if/else-if statement syntax regex matching, fixes [#524](https://github.com/senforsce/t1/issues/524) in #31
-- Add syntax highlighting for style/script tags, fixes [#489](https://github.com/senforsce/t1/issues/489) in #32
-- Add syntax highlighting support for HTML attribute conditional statements, fixes [#533](https://github.com/senforsce/t1/issues/533) in #33
+- Resolve single line import expression syntax highlighting, fixes [#508](https://github.com/senforsce/tndr/issues/508) in #29
+- Refactor import-expression syntax regex matching, fixes [#524](https://github.com/senforsce/tndr/issues/524) in #30
+- Refactor if/else-if statement syntax regex matching, fixes [#524](https://github.com/senforsce/tndr/issues/524) in #31
+- Add syntax highlighting for style/script tags, fixes [#489](https://github.com/senforsce/tndr/issues/489) in #32
+- Add syntax highlighting support for HTML attribute conditional statements, fixes [#533](https://github.com/senforsce/tndr/issues/533) in #33
 
 ### [0.0.19](https://github.com/a-h/t1-vscode/compare/v0.0.18...v0.0.19) (2024-01-19)
 
 ### Features
 
-- Resolve issue with broken syntax highlighting on switch statements, fixes [#437](https://github.com/senforsce/t1/issues/437) ([b6f0c68](https://github.com/a-h/t1-vscode/commit/b6f0c68b487bf96648661d6d1ada81b76c09f492))
+- Resolve issue with broken syntax highlighting on switch statements, fixes [#437](https://github.com/senforsce/tndr/issues/437) ([b6f0c68](https://github.com/a-h/t1-vscode/commit/b6f0c68b487bf96648661d6d1ada81b76c09f492))
 
 ### [0.0.18](https://github.com/a-h/t1-vscode/compare/v0.0.17...v0.0.18) (2024-01-04)
 

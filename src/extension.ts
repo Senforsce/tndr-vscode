@@ -127,7 +127,7 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
       (event) => {
         if (
           vscode.window.activeTextEditor &&
-          event.document === vscode.window.activeTextEditor.document
+          event?.document === vscode.window.activeTextEditor?.document
         ) {
           updateDecorations(vscode.window.activeTextEditor, decorationType, decorationType2);
         }
@@ -149,12 +149,12 @@ function updateDecorations(editor: vscode.TextEditor, decorationType: vscode.Tex
   console.log("WD", editor, decorationType, decorationType2)
 
   const regex = /[ "](\w+:\w+)[ "\n]/g;
-  const text = editor.document.getText();
+  const text = editor?.document.getText();
   const decorations: vscode.DecorationOptions[] = [];
   let match;
   while ((match = regex.exec(text))) {
-    const startPos = editor.document.positionAt(match.index);
-    const endPos = editor.document.positionAt(
+    const startPos = editor?.document.positionAt(match.index);
+    const endPos = editor?.document.positionAt(
       match.index + match[0].length
     );
     const decoration = { range: new vscode.Range(startPos, endPos) };
@@ -165,8 +165,8 @@ function updateDecorations(editor: vscode.TextEditor, decorationType: vscode.Tex
   const decorations2: vscode.DecorationOptions[] = [];
   let match2;
   while ((match2 = regex2.exec(text))) {
-    const startPos = editor.document.positionAt(match2.index);
-    const endPos = editor.document.positionAt(
+    const startPos = editor?.document.positionAt(match2.index);
+    const endPos = editor?.document.positionAt(
       match2.index + match2[0].length
     );
     const decoration = { range: new vscode.Range(startPos, endPos) };
