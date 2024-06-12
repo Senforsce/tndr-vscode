@@ -77,7 +77,7 @@ export async function activate(ctx: vscode.ExtensionContext) {
         );
         const word = wordRange ? document.getText(wordRange) : "";
         // Check if the word matches the pattern "prefix:SomeIdentifier"
-        const pattern = /[ "](\w+:\w+)[ "\n]/g;
+        const pattern = /~[ "](\w+:\w+)[ "\n]~/g;
         const match = word.match(pattern);
 
         if (match) {
@@ -144,11 +144,7 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
 
 
 function updateDecorations(editor: vscode.TextEditor, decorationType: vscode.TextEditorDecorationType, decorationType2: vscode.TextEditorDecorationType) {
-
-
-  console.log("WD", editor, decorationType, decorationType2)
-
-  const regex = /[ "](\w+:\w+)[ "\n]/g;
+  const regex = /~[ "](\w+:\w+)[ "\n]~/g;
   const text = editor?.document.getText();
   const decorations: vscode.DecorationOptions[] = [];
   let match;
