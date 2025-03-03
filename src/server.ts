@@ -78,7 +78,6 @@ export const startServer = async (settings?: Record<string, string>) => {
         });
       });
     } catch (error) {
-      console.log(`${prefixes} SELECT * WHERE { ${subject} ?p ?o }`)
 
       console.error("Error fetching bindings:", error);
       res.status(500).send("Internal Server Error");

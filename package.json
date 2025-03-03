@@ -109,6 +109,16 @@
           "default": "./main.hdt",
           "description": "(Coming Soon) Defines which compressed graph to search definitions of subjects"
         },
+        "t1.hdtCapturePrefix": {
+          "type": ["string"],
+          "default": "§",
+          "description": "Prefix for hdt term to be captured"
+        },
+        "t1.hdtCaptureSuffix": {
+          "type": ["string"],
+          "default": "!",
+          "description": "Suffix for hdt term to be captured"
+        },
         "t1.textDecoration": {
           "type": ["string"],
           "default": "underline",

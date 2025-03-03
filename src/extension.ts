@@ -31,6 +31,8 @@ export async function activate(ctx: vscode.ExtensionContext) {
   const prefixes = settings.get("prefixes") as string;
   const textDecoration =
   (settings.get("textDecoration") as string) ?? "underline";
+  const pref = (settings.get("hdtCapturePrefix") as string) ?? "§";
+  const suff = (settings.get("hdtCaptureSuffix") as string) ?? "!";
   const color = (settings.get("color") as string) ?? "white";
   const backgroundColor = settings.get("backgroundColor") ?? "purple";
   const color2 = "gray";
@@ -77,17 +79,15 @@ export async function activate(ctx: vscode.ExtensionContext) {
         );
         const word = wordRange ? document.getText(wordRange) : "";
         // Check if the word matches the pattern "prefix:SomeIdentifier"
-        const pattern = /~[ "](\w+:\w+)[ "\n]~/g;
+        const pattern = new RegExp(`/${pref}(\w+:\w+)${suff}/g`);
         const match = word.match(pattern);
 
         if (match) {
           const subj = match[1] ?? match[0].replaceAll(`"`, "");
           const resp = await axios.get(`${lpfEndpoint}/subject/${subj}`);
 
-          console.log(resp);
 
           if (resp.status === 200 && resp.data) {
-            console.log(resp.status, resp.data);
 
             const mkdown = `
 ### ${subj}
@@ -97,11 +97,9 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
                 `;
 
             const hoverText = new vscode.MarkdownString(mkdown);
-            console.log(resp.status, resp.data);
 
             return new vscode.Hover(hoverText);
           } else {
-            console.log(resp.status, resp.data);
             const hoverText = new vscode.MarkdownString("loading.....");
 
             return new vscode.Hover(hoverText);
@@ -144,7 +142,12 @@ ${resp.data?.p?.value} : ${resp.data?.o?.value}
 
 
 function updateDecorations(editor: vscode.TextEditor, decorationType: vscode.TextEditorDecorationType, decorationType2: vscode.TextEditorDecorationType) {
-  const regex = /~[ "](\w+:\w+)[ "\n]~/g;
+  const settings = vscode.workspace.getConfiguration(
+    "tndr.Config"
+  );
+  const pref = (settings.get("hdtCapturePrefix") as string) ?? "§";
+  const suff = (settings.get("hdtCaptureSuffix") as string) ?? "!";
+  const regex = new RegExp(`/${pref}(\w+:\w+)${suff}/g`);
   const text = editor?.document.getText();
   const decorations: vscode.DecorationOptions[] = [];
   let match;
@@ -446,7 +449,6 @@ export async function buildLanguageClient(): Promise<LanguageClient> {
             const ret = [] as any[];
             for (let i = 0; i < configs.length; i++) {
               let workspaceConfig = configs[i];
-              console.log(workspaceConfig);
               ret.push(workspaceConfig);
             }
             return ret;
